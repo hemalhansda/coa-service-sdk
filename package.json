@@ -2,16 +2,16 @@
   "name": "coa-service-sdk",
   "version": "1.4.1",
   "description": "SDK and CLI for deploying Dockerized apps to coa-service — your self-hosted personal container cloud",
-  "author": "Hemaal <hemaal.h@gmail.com>",
+  "author": "Hemaal Hansda <hemal.hansda25@gmail.com>",
   "license": "MIT",
-  "homepage": "https://github.com/hemaal/coa-service-sdk#readme",
-  "documentation": "https://github.com/hemaal/coa-service-sdk#readme",
+  "homepage": "https://github.com/hemalhansda/coa-service-sdk#readme",
+  "documentation": "https://github.com/hemalhansda/coa-service-sdk#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hemaal/coa-service-sdk.git"
+    "url": "git+https://github.com/hemalhansda/coa-service-sdk.git"
   },
   "bugs": {
-    "url": "https://github.com/hemaal/coa-service-sdk/issues"
+    "url": "https://github.com/hemalhansda/coa-service-sdk/issues"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
