@@ -265,12 +265,39 @@ export interface TableDetail {
   sizeIndexes: string;
 }
 
-export interface QueryResult {
+export interface QueryResult<T extends Record<string, unknown> = Record<string, unknown>> {
   columns: string[];
-  rows: Record<string, unknown>[];
+  rows: T[];
   rowCount: number;
   command: string;
   durationMs: number;
+}
+
+// ─── Transaction ──────────────────────────────────────────────────────────────
+
+export interface TransactionQuery {
+  /** SQL query (use $1, $2, … for parameters) */
+  sql: string;
+  /** Parameter values for $1, $2, … placeholders */
+  params?: unknown[];
+}
+
+export interface TransactionResult {
+  /** Array of query results — one per query in the transaction */
+  results: QueryResult[];
+  /** Total transaction duration in milliseconds */
+  durationMs: number;
+}
+
+// ─── CoaDB (Serverless Client) ────────────────────────────────────────────────
+
+export interface CoaDBOptions {
+  /** COA API base URL, e.g. https://coa-service.cloud/api/v1 */
+  apiUrl: string;
+  /** API key for authentication */
+  apiKey: string;
+  /** Database ID to query */
+  databaseId: string;
 }
 
 // ─── Managed Apps ─────────────────────────────────────────────────────────────

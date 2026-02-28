@@ -16,6 +16,8 @@ import {
   TableListItem,
   TableDetail,
   QueryResult,
+  TransactionQuery,
+  TransactionResult,
 } from './types';
 
 type FetchFn  = (urlPath: string, init?: RequestInit) => Promise<Response>;
@@ -278,21 +280,62 @@ export class DatabaseClient {
   // ─── SQL Explorer — execute query ─────────────────────────────────────────
 
   /**
-   * Execute an arbitrary SQL query against a managed database and return the result set.
+   * Execute a SQL query with optional parameterized values ($1, $2, …).
    *
    * ```ts
+   * // Simple query
    * const result = await coa.databases.query('uuid-…', 'SELECT * FROM users LIMIT 10');
-   * console.log(result.columns); // ['id', 'email', …]
-   * console.log(result.rows);    // [{ id: 1, email: '…' }, …]
+   *
+   * // Parameterized query (recommended for user input)
+   * const result = await coa.databases.query(
+   *   'uuid-…',
+   *   'SELECT * FROM users WHERE email = $1 AND active = $2',
+   *   ['alice@example.com', true],
+   * );
    * ```
+   *
+   * @param databaseId Database ID
+   * @param sql        SQL query (max 50 KB). Use $1, $2, … for parameters.
+   * @param params     Parameter values for $1, $2, … placeholders (max 500).
    */
-  async query(databaseId: string, sql: string): Promise<QueryResult> {
+  async query(databaseId: string, sql: string, params?: unknown[]): Promise<QueryResult> {
     const res = await this.fetch(`/api/v1/databases/${databaseId}/query`, {
       method: 'POST',
-      body: JSON.stringify({ sql }),
+      body: JSON.stringify({
+        sql,
+        ...(params && params.length > 0 ? { params } : {}),
+      }),
       headers: { 'Content-Type': 'application/json' },
     });
     const json = await this.parse<{ data: QueryResult }>(res, 'databases.query');
     return json.data ?? (json as unknown as QueryResult);
+  }
+
+  // ─── Transaction ──────────────────────────────────────────────────────────
+
+  /**
+   * Execute multiple queries in a single atomic transaction.
+   * All queries succeed together or are fully rolled back on any error.
+   *
+   * ```ts
+   * const result = await coa.databases.transaction('uuid-…', [
+   *   { sql: 'UPDATE accounts SET balance = balance - $1 WHERE id = $2', params: [100, fromId] },
+   *   { sql: 'UPDATE accounts SET balance = balance + $1 WHERE id = $2', params: [100, toId] },
+   * ]);
+   * console.log(result.results);    // array of QueryResult
+   * console.log(result.durationMs); // total transaction time
+   * ```
+   *
+   * @param databaseId Database ID
+   * @param queries    Array of { sql, params? } objects (max 50 queries)
+   */
+  async transaction(databaseId: string, queries: TransactionQuery[]): Promise<TransactionResult> {
+    const res = await this.fetch(`/api/v1/databases/${databaseId}/transaction`, {
+      method: 'POST',
+      body: JSON.stringify({ queries }),
+      headers: { 'Content-Type': 'application/json' },
+    });
+    const json = await this.parse<{ data: TransactionResult }>(res, 'databases.transaction');
+    return json.data ?? (json as unknown as TransactionResult);
   }
 }
