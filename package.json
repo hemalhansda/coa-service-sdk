@@ -1,6 +1,6 @@
 {
   "name": "coa-service-sdk",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "SDK and CLI for deploying Dockerized apps to coa-service — your self-hosted personal container cloud",
   "author": "Hemaal <hemaal.h@gmail.com>",
   "license": "MIT",
